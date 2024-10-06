@@ -17,21 +17,23 @@ def predict_rub_salary(salary_from=None, salary_to=None):
     return average_salary
 
 
-def head_hunter(popular_languages):
+def get_head_hunter_vacancies(popular_languages):
     language_statistic = {}
 
     for language in popular_languages:
-        processis_vacansy = 0
-        salaries_vacansy = []
+        vacansy_salaries = []
+        moscow = 1
+        period = 30
         for page in count(0):
             hh_url = 'https://api.hh.ru/vacancies'
-            params = {'text': language, 'area': 1, 'period': 30, 'page': page}
+            params = {'text': language, 'area': moscow, 'period': period, 'page': page}
             response = requests.get(hh_url, params=params)
             response.raise_for_status()
 
-            found_vacansy = response.json()['found']
-            vacansies = response.json()['items']
-            pages = response.json()['pages']
+            vacansies = response.json()
+            found_vacansy = vacansies['found']
+            vacansies = vacansies['items']
+            pages = vacansies['pages']
             if page >= pages - 1:
                 break
             for vacansy in vacansies:
@@ -39,14 +41,13 @@ def head_hunter(popular_languages):
                 if salary and salary['currency'] == 'RUR':
                     predicted_salary = predict_rub_salary(vacansy['salary'].get('from'), vacansy['salary'].get('to'))
                     if predicted_salary:
-                        processis_vacansy += 1
-                        salaries_vacansy.append(predicted_salary)
+                        vacansy_salaries = [].append(predicted_salary)
         average_salary = None
-        if salaries_vacansy:
-            average_salary = int(sum(salaries_vacansy) / len(salaries_vacansy))
+        if vacansy_salaries:
+            average_salary = int(sum(vacansy_salaries) / len(vacansy_salaries))
         language_statistic[language] = {
             "vacancies_found": found_vacansy,
-            "vacancies_processed": processis_vacansy,
+            "vacancies_processed": len(vacansy_salaries),
             "average_salary": average_salary
         }
     return language_statistic
@@ -55,30 +56,33 @@ def head_hunter(popular_languages):
 def predict_rub_salary_sj(popular_languages, sj_token):
     language_statistic_sj = {}
     for language in popular_languages:
-        processis_vacansy_sj = 0
         salaries_vacansy_sj = []
-        sj_url = 'https://api.superjob.ru/2.0/vacancies/'
-        params = {'town': 'Moscow', 'keyword': language}
-        headers = {
-            'X-Api-App-Id': sj_token
-        }
-        response = requests.get(sj_url, headers=headers, params=params)
-        response.raise_for_status()
-        super_job_vacansy = response.json()['objects']
-        total_vacansy = response.json()['total']
-        for vacansy in super_job_vacansy:
-            predicted_salary_sj = predict_rub_salary(vacansy['payment_from'], vacansy['payment_to'])
-            if predicted_salary_sj:
-                processis_vacansy_sj += 1
-                salaries_vacansy_sj.append(predicted_salary_sj)
+        for page in count(0):
+            sj_url = 'https://api.superjob.ru/2.0/vacancies/'
+            params = {'town': 'Moscow', 'keyword': language, 'page': page}
+            headers = {
+                'X-Api-App-Id': sj_token
+            }
+            response = requests.get(sj_url, headers=headers, params=params)
+            response.raise_for_status()
+            
+            vacansies = response.json()
+            super_job_vacancies = vacansies['objects']
+            total_vacansy = vacansies['total']
+            if not super_job_vacancies:
+                break
+            for vacansy in super_job_vacancies:
+                predicted_salary_sj = predict_rub_salary(vacansy['payment_from'], vacansy['payment_to'])
+                if predicted_salary_sj:
+                    salaries_vacansy_sj.append(predicted_salary_sj)
             average_salary = None
             if salaries_vacansy_sj:
                 average_salary = int(sum(salaries_vacansy_sj) / len(salaries_vacansy_sj))
-            language_statistic_sj[language] = {
-                "vacancies_found": total_vacansy,
-                "vacancies_processed": processis_vacansy_sj,
-                "average_salary": average_salary
-            }
+        language_statistic_sj[language] = {
+            "vacancies_found": total_vacansy,
+            "vacancies_processed": len(salaries_vacansy_sj),
+            "average_salary": average_salary
+        }
     return language_statistic_sj
 
 
@@ -107,7 +111,7 @@ def main():
         'Shell',
         'TypeScript',
     ]
-    print(table_language(head_hunter(popular_languages)))
+    # print(table_language(get_head_hunter_vacancies(popular_languages)))
     print(table_language(predict_rub_salary_sj(popular_languages, sj_token)))
 
 
