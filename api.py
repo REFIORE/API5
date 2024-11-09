@@ -41,7 +41,7 @@ def get_head_hunter_vacancies(popular_languages):
                 if salary and salary['currency'] == 'RUR':
                     predicted_salary = predict_rub_salary(vacansy['salary'].get('from'), vacansy['salary'].get('to'))
                     if predicted_salary:
-                        vacansy_salaries = [].append(predicted_salary)
+                        vacansy_salaries.append(predicted_salary)
         average_salary = None
         if vacansy_salaries:
             average_salary = int(sum(vacansy_salaries) / len(vacansy_salaries))
