@@ -86,7 +86,7 @@ def predict_rub_salary_sj(popular_languages, sj_token):
     return language_statistic_sj
 
 
-def table_language(statistic):
+def get_table_language(statistic):
     table_data = [
         ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата'],
     ]
@@ -111,8 +111,8 @@ def main():
         'Shell',
         'TypeScript',
     ]
-    # print(table_language(get_head_hunter_vacancies(popular_languages)))
-    print(table_language(predict_rub_salary_sj(popular_languages, sj_token)))
+    print(get_table_language(get_head_hunter_vacancies(popular_languages)))
+    print(get_table_language(predict_rub_salary_sj(popular_languages, sj_token)))
 
 
 if __name__ == "__main__":
