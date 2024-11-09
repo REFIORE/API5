@@ -76,8 +76,8 @@ def predict_rub_salary_sj(popular_languages, sj_token):
                 if predicted_salary_sj:
                     salaries_vacansy_sj.append(predicted_salary_sj)
             average_salary = None
-            if salaries_vacansy_sj:
-                average_salary = int(sum(salaries_vacansy_sj) / len(salaries_vacansy_sj))
+        if salaries_vacansy_sj:
+            average_salary = int(sum(salaries_vacansy_sj) / len(salaries_vacansy_sj))
         language_statistic_sj[language] = {
             "vacancies_found": total_vacansy,
             "vacancies_processed": len(salaries_vacansy_sj),
